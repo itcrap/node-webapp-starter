@@ -14,7 +14,7 @@ Starter project for creating NodeJS enterprise applications with prebuilded deve
 
 # Installation
 
-Clone repo
+Clone repo to current directory
 
 ```
 git clone https://github.com/itcrap/node-webapp-starter .
