@@ -2,6 +2,8 @@
 
 Starter project for creating NodeJS enterprise applications with prebuilded development tools for clean and comfortable code development
 
+:zap: Dotenv support for configuring application via .env file
+
 :zap: Linters for js and css files with code autofixing
 
 :zap: Webpack for compiling code from `src` to `dist` directory
