@@ -1,6 +1,6 @@
 # 🚀 node-webapp-starter
 
-Starter project for creating NodeJS enterprise-level applications with prebuilded development tools for clean and comfortable code development
+Starter project for creating NodeJS enterprise applications with prebuilded development tools for clean and comfortable code development
 
 :zap: Linters for js and css files with code autofixing
 
