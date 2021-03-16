@@ -10,20 +10,37 @@ Starter project for creating NodeJS enterprise-level applications with prebuilde
 
 :zap: PWA Support by Service Worker included in index.html template
 
+# Installation
 
-##Building project
+Clone repo
+
+```
+git clone https://github.com/itcrap/node-webapp-starter .
+```
+
+Install dependencies
+
+```
+npm install
+```
+
+And do some magic!
+
+
+
+## Building project
 
 ```
 npm run build
 ```
 
-##Realtime compiling process without serve
+## Realtime compiling process without serve
 
 ```
 npm run watch
 ```
 
-##Realtime compiling process and serve by http
+## Realtime compiling process and serve by http
 
 ```
 npm run serve
