@@ -28,19 +28,19 @@ And do some magic!
 
 
 
-## Building project
+### Building project
 
 ```
 npm run build
 ```
 
-## Realtime compiling process without serve
+### Realtime compiling process without serve
 
 ```
 npm run watch
 ```
 
-## Realtime compiling process and serve by http
+### Realtime compiling process and serve by http
 
 ```
 npm run serve
