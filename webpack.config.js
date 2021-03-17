@@ -11,6 +11,12 @@ const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 
 module.exports = {
   mode: config.MODE,
+  stats: {
+    colors: true,
+    logging: config.LOG_LEVEL,
+    preset: config.LOG_PRESET,
+    timings: true
+  },
   devServer: {
     // opens browser on start
     open: false,
