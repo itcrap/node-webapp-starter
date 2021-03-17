@@ -25,6 +25,7 @@ module.exports = {
     new webpack.ProgressPlugin(),
     new MiniCssExtractPlugin({ filename: 'main.[contenthash].css' }),
     new HtmlWebpackPlugin({
+      favicon: "favicon.png",
       template: 'index.html'
     }),
     new WorkboxWebpackPlugin.GenerateSW({
