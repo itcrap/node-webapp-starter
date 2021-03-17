@@ -12,7 +12,8 @@ const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 module.exports = {
   mode: config.MODE,
   devServer: {
-    open: true,
+    // opens browser on start
+    open: false,
     host: config.HOST,
     port: config.PORT
   },
@@ -22,13 +23,17 @@ module.exports = {
     clean: true,
   },
   plugins: [
+    /* Webpack progress bar */
     new webpack.ProgressPlugin(),
+    /* CSS minify */
     new MiniCssExtractPlugin({ filename: 'main.[contenthash].css' }),
+    /* HTML template generator */
     new HtmlWebpackPlugin({
       title: config.APPNAME,
       favicon: "favicon.png",
       template: 'index.html'
     }),
+    /* PWA Service Worker */
     new WorkboxWebpackPlugin.GenerateSW({
       swDest: 'sw.js',
       // these options encourage the ServiceWorkers to get in there fast
@@ -36,6 +41,7 @@ module.exports = {
       clientsClaim: true,
       skipWaiting: true,
     }),
+    /* Linter for JavaScript */
     new ESLintPlugin({
       eslintPath: 'eslint',
       context: 'src',
@@ -44,6 +50,7 @@ module.exports = {
       quiet: false,
       extensions: ['js', 'ts', 'tsx'],
     }),
+    /* Linter for CSS */
     new StylelintPlugin({
       configFile: '.stylelintrc',
       context: 'src/assets/css',
@@ -56,10 +63,12 @@ module.exports = {
 
   module: {
     rules: [{
+      /* JavaScript loaders */
       test: /\.(js|jsx)$/,
       include: [path.resolve(__dirname, 'src')],
       loader: 'babel-loader'
     }, {
+      /* CSS loaders */
       test: /.css$/,
       use: [{
         loader: MiniCssExtractPlugin.loader
@@ -69,6 +78,10 @@ module.exports = {
           sourceMap: true
         }
       }]
+    }, {
+      /* Media loaders */
+      test: /\.(?:ico|gif|png|jpg|jpeg)$/i,
+      type: 'asset/resource',
     }]
   }
 }
