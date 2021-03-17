@@ -9,8 +9,12 @@
     "serve": "webpack serve --progress"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": {
+    "name": "Matthew Soul",
+    "email": "itcraper@gmail.com",
+    "url": "http://itcrap.ru/"
+  },
+  "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.13.10",
     "@babel/eslint-parser": "^7.13.10",

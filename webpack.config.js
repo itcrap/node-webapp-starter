@@ -16,6 +16,11 @@ module.exports = {
     host: config.HOST,
     port: config.PORT
   },
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: '[name].bundle.js',
+    clean: true,
+  },
   plugins: [
     new webpack.ProgressPlugin(),
     new MiniCssExtractPlugin({ filename: 'main.[contenthash].css' }),
@@ -24,8 +29,10 @@ module.exports = {
     }),
     new WorkboxWebpackPlugin.GenerateSW({
       swDest: 'sw.js',
+      // these options encourage the ServiceWorkers to get in there fast
+      // and not allow any straggling "old" SWs to hang around
       clientsClaim: true,
-      skipWaiting: false,
+      skipWaiting: true,
     }),
     new ESLintPlugin({
       eslintPath: 'eslint',
