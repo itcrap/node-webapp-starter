@@ -25,6 +25,7 @@ module.exports = {
     new webpack.ProgressPlugin(),
     new MiniCssExtractPlugin({ filename: 'main.[contenthash].css' }),
     new HtmlWebpackPlugin({
+      title: config.APPNAME,
       favicon: "favicon.png",
       template: 'index.html'
     }),
