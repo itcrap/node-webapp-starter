@@ -1,5 +1,6 @@
 require('dotenv').config()
 const config = process.env;
+const logger = require("./winston.logger.js");
 const path = require('path');
 const webpack = require('webpack');
 const ESLintPlugin = require('eslint-webpack-plugin');
@@ -10,24 +11,44 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 
 module.exports = {
+  /* Webpack working mode */
   mode: config.MODE,
+  /* Webpack logging settings */
   stats: {
     colors: true,
     logging: config.LOG_LEVEL,
     preset: config.LOG_PRESET,
     timings: true
   },
+  /* Webpack development server */
   devServer: {
     // opens browser on start
     open: false,
+    hot: true,
     host: config.HOST,
-    port: config.PORT
+    port: config.PORT,
+    overlay: {
+      warnings: true,
+      errors: true,
+    },
+    // https: {
+    //   key: fs.readFileSync('/path/to/server.key'),
+    //   cert: fs.readFileSync('/path/to/server.crt'),
+    //   ca: fs.readFileSync('/path/to/ca.pem'),
+    // },
+    // runs logger middleware
+    before: function(app, server) {
+      app.use(logger.webpackLogger);
+      app.use(logger.webpackErrorLogger);
+    }
   },
+  /* Webpack compile outputs */
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: '[name].bundle.js',
     clean: true,
   },
+  /* Webpack plugins */
   plugins: [
     /* Webpack progress bar */
     new webpack.ProgressPlugin(),
@@ -66,7 +87,7 @@ module.exports = {
     }),
     new CleanWebpackPlugin(),
   ],
-
+  /* Webpack modules */
   module: {
     rules: [{
       /* JavaScript loaders */
@@ -89,5 +110,9 @@ module.exports = {
       test: /\.(?:ico|gif|png|jpg|jpeg)$/i,
       type: 'asset/resource',
     }]
-  }
+  },
+  /* Webpack external dynamic libraries */
+  // externals: {
+  //   "winston": 'require("winston")',
+  // }
 }
