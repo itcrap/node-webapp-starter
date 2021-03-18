@@ -10,6 +10,8 @@ Starter project for creating NodeJS enterprise applications with prebuilded deve
 
 :zap: Webpack development server for serving application
 
+:zap: Prebuild logging system based on Winston
+
 :zap: PWA Support by Service Worker included in index.html template
 
 # Installation
