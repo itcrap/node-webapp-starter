@@ -27,20 +27,23 @@ const outputFormat = () => {
   });
 
   switch (config.LOG_FORMAT) {
+    case "csv":
+      return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.splat(), csvFormat)
+      break;
+    case "inline":
+      return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.splat(), inlineFormat)
+      break;
     case "json":
       return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.json())
+      break;
+    case "logstash":
+      return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.logstash())
       break;
     case "pretty":
       return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.prettyPrint())
       break;
     case "simple":
       return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.simple())
-      break;
-    case "csv":
-      return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.splat(), csvFormat)
-      break;
-    case "inline":
-      return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.splat(), inlineFormat)
       break;
     default:
       throw new Error("LOG_FORMAT is not configured correctly in .env file");
