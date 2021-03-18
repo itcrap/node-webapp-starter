@@ -1,4 +1,4 @@
 const run = () => {
-  console.log('Hello asdasd World!');
+  console.log('Hello World!');
 };
 run();
