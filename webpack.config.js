@@ -1,6 +1,6 @@
 require('dotenv').config()
 const config = process.env;
-const logger = require("./winston.logger.js");
+const { expressLogger, expressErrorLogger } = require("./winston.logger.js");
 const path = require('path');
 const webpack = require('webpack');
 const ESLintPlugin = require('eslint-webpack-plugin');
@@ -38,8 +38,8 @@ module.exports = {
     // },
     // runs logger middleware
     before: function(app, server) {
-      app.use(logger.webpackLogger);
-      app.use(logger.webpackErrorLogger);
+      app.use(expressLogger);
+      app.use(expressErrorLogger);
     }
   },
   /* Webpack compile outputs */

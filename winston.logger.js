@@ -1,115 +1,178 @@
-require('dotenv').config()
+require("dotenv").config();
+
 const config = process.env;
-const { format, transports } = require("winston");
-const expressWinston = require('express-winston');
+const winston = require("winston");
 
-console.log(`Initializing logging in ${config.LOG_FORMAT} mode`)
+const { format, transports } = winston;
+const expressWinston = require("express-winston");
 
-const outputFormat = () => {
+console.log(`Initializing logging in ${config.LOG_FORMAT} mode`);
 
-  const inlineFormat = format.printf(({ level, message, label, timestamp, meta }) => {
-    const summary = []
-    summary.push(`[${timestamp}]`);
-    summary.push(`[${level}]`);
-    summary.push(message);
-    summary.push(`from ${meta.req.headers.host}`);
-    summary.push(meta.req.headers["user-agent"]);
-    return summary.join(" ");
-  });
+const inlineType = (type) => {
+  switch (type) {
+    case "default":
+      return format.printf(
+        ({ level, message, timestamp }) => `[${timestamp}][${level}] ${message}`
+      );
+    case "express":
+      return format.printf(({ level, message, timestamp, meta }) => {
+        const msg = [];
+        msg.push(`[${timestamp}]`);
+        msg.push(`[${level}]`);
+        msg.push(` ${message}`);
+        msg.push(` from ${meta ? meta.req.headers.host : ""}`);
+        msg.push(` at ${meta ? meta.req.headers["user-agent"] : ""}`);
+        msg.push(` with status code ${meta ? meta.res.statusCode : ""}`);
+        return msg.join("");
+      });
+    default:
+      throw new Error(`Format type ${type} is not supported`);
+  }
+};
 
-  const csvFormat = format.printf(({ level, message, label, timestamp, meta }) => {
-    const summary = []
-    summary.push(timestamp);
-    summary.push(level);
-    summary.push(message);
-    summary.push(meta ? JSON.stringify(meta) : '');
-    return summary.join(";");
-  });
+const csvType = (type) => {
+  switch (type) {
+    case "default":
+      return format.printf(({ level, message, timestamp }) => {
+        const msg = [];
+        msg.push(timestamp);
+        msg.push(level);
+        msg.push(message);
+        return msg.join(config.LOG_SEPARATOR);
+      });
+    case "express":
+      return format.printf(({ level, message, timestamp, meta }) => {
+        const msg = [];
+        msg.push(timestamp);
+        msg.push(level);
+        msg.push(message);
+        msg.push(meta ? meta.req.url : "");
+        msg.push(meta ? meta.req.method : "");
+        msg.push(meta ? meta.req.httpVersion : "");
+        msg.push(meta ? meta.req.originalUrl : "");
+        msg.push(meta ? JSON.stringify(meta.req.query) : "");
+        msg.push(meta ? meta.res.statusCode : "");
+        msg.push(meta ? meta.req.headers.host : "");
+        msg.push(meta ? meta.req.headers.accept : "");
+        msg.push(meta ? meta.req.headers.connection : "");
+        return msg.join(config.LOG_SEPARATOR);
+      });
+    default:
+      throw new Error(`Format type ${type} is not supported`);
+  }
+};
 
+const combineFormats = (formatType, isConsole) => {
+  const fmts = [];
+  fmts.push(format.timestamp({ format: config.LOG_TSFORMAT }));
+  if (isConsole) {
+    fmts.push(format.colorize({ all: true }));
+  }
+  fmts.push(formatType);
+  return format.combine(...fmts);
+};
+
+const getLogFormat = (formatType, isConsole) => {
   switch (config.LOG_FORMAT) {
     case "csv":
-      return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.splat(), csvFormat)
-      break;
+      return combineFormats(csvType(formatType), isConsole);
     case "inline":
-      return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.splat(), inlineFormat)
-      break;
+      return combineFormats(inlineType(formatType), isConsole);
     case "json":
-      return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.json())
-      break;
+      return combineFormats(format.json(), false);
     case "logstash":
-      return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.logstash())
-      break;
+      return combineFormats(format.logstash(), false);
     case "pretty":
-      return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.prettyPrint())
-      break;
+      return combineFormats(format.prettyPrint(), false);
     case "simple":
-      return format.combine(format.timestamp({ format: config.LOG_TSFORMAT }), format.simple())
-      break;
+      return combineFormats(format.simple(), isConsole);
     default:
       throw new Error("LOG_FORMAT is not configured correctly in .env file");
   }
-}
-
-const outputColorize = () => {
-  return config.LOG_FORMAT == 'simple' ? format.combine(format.colorize(), outputFormat()) : outputFormat()
-}
+};
 
 // Configuration for expressWinston.logger()
-// https://github.com/bithavoc/express-winston 
+// https://github.com/bithavoc/express-winston
 const options = {
   defaults: {
-    level: 'info',
+    level: "info",
     handleExceptions: true,
     exitOnError: false,
-    format: format.json()
+    format: format.json(),
   },
-  outputDefault: {
-    level: 'info',
-    filename: `logs/default.log`,
+  defaultLogging: {
+    level: "info",
+    filename: "logs/default.log",
     maxsize: 5242880, // 5MB
     maxFiles: 5,
     handleExceptions: true,
     exitOnError: false,
-    format: outputFormat()
+    format: getLogFormat("default", false),
   },
-  outputError: {
-    level: 'error',
-    filename: `logs/error.log`,
+  expressRequests: {
+    level: "info",
+    filename: "logs/default.log",
     maxsize: 5242880, // 5MB
     maxFiles: 5,
     handleExceptions: true,
     exitOnError: false,
-    format: outputFormat()
+    format: getLogFormat("express", false),
   },
-  outputConsole: {
-    level: 'info',
+  expressErrors: {
+    level: "error",
+    filename: "logs/error.log",
+    maxsize: 5242880, // 5MB
+    maxFiles: 5,
     handleExceptions: true,
     exitOnError: false,
-    format: outputColorize()
+    format: getLogFormat("express", false),
+  },
+  defaultConsole: {
+    level: "info",
+    handleExceptions: true,
+    exitOnError: false,
+    format: getLogFormat("default", true),
+  },
+  expressConsole: {
+    level: "info",
+    handleExceptions: true,
+    exitOnError: false,
+    format: getLogFormat("express", true),
   },
 };
 
-/* Express request handler */
-const webpackLogger = expressWinston.logger({
+/* Default logger */
+const log = winston.createLogger({
   ...options.defaults,
   transports: [
-    new(transports.Console)(options.outputConsole),
-    new(transports.File)(options.outputDefault),
-    new(transports.File)(options.outputError),
-  ]
-})
+    new transports.Console(options.defaultConsole),
+    new transports.File(options.defaultLogging),
+    new transports.File(options.defaultLogging),
+  ],
+});
+
+/* Express request handler */
+const expressLogger = expressWinston.logger({
+  ...options.defaults,
+  transports: [
+    new transports.Console(options.expressConsole),
+    new transports.File(options.expressRequests),
+    new transports.File(options.expressErrors),
+  ],
+});
 
 /* Express error handler */
-const webpackErrorLogger = expressWinston.errorLogger({
+const expressErrorLogger = expressWinston.errorLogger({
   ...options.defaults,
   transports: [
-    new(transports.Console)(options.outputConsole),
-    new(transports.File)(options.outputDefault),
-    new(transports.File)(options.outputError),
-  ]
+    new transports.Console(options.expressConsole),
+    new transports.File(options.expressRequests),
+    new transports.File(options.expressErrors),
+  ],
 });
 
 module.exports = {
-  webpackLogger,
-  webpackErrorLogger
-}
+  log,
+  expressLogger,
+  expressErrorLogger,
+};
