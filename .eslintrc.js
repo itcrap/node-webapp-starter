@@ -12,7 +12,7 @@ module.exports = {
     "max-len": [2, { code: 140, tabWidth: 2, ignoreUrls: true }],
     "no-console": "off",
     "no-underscore-dangle": "off",
-    "prettier/prettier": "error",
+    "prettier/prettier": "error"
   },
   settings: {
     "import/resolver": {
